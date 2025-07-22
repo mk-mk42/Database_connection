@@ -1007,6 +1007,8 @@ class MainWindow(QMainWindow):
             self.execute_query()
 
 
+#test 
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     if not os.path.exists("assets"):
