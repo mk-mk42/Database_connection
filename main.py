@@ -1,3 +1,4 @@
+# This is our main file
 import sys
 import os
 import time
@@ -35,7 +36,8 @@ class MainWindow(QMainWindow):
         self.thread_pool = QThreadPool.globalInstance()
         self.tab_timers = {}
         self.running_queries = {}
-        self.active_schema_connector = None # To hold the currently active connector for schema Browse
+        # To hold the currently active connector for schema Browse
+        self.active_schema_connector = None
 
         self._create_actions()
         self._create_menu()
@@ -74,7 +76,7 @@ class MainWindow(QMainWindow):
             Qt.ContextMenuPolicy.CustomContextMenu)
         self.schema_tree.customContextMenuRequested.connect(
             self.show_schema_context_menu)
-        
+
         # Connect schema tree expanded signal once
         self.schema_tree.expanded.connect(self._handle_schema_tree_expansion)
 
@@ -93,7 +95,8 @@ class MainWindow(QMainWindow):
         main_splitter.addWidget(self.tab_widget)
 
         self.thread_monitor_timer = QTimer()
-        self.thread_monitor_timer.timeout.connect(self.update_thread_pool_status)
+        self.thread_monitor_timer.timeout.connect(
+            self.update_thread_pool_status)
         self.thread_monitor_timer.start(1000)
 
         self.load_object_explorer_data()
@@ -137,9 +140,10 @@ class MainWindow(QMainWindow):
         self.addToolBar(toolbar)
 
     def update_thread_pool_status(self):
-         active = self.thread_pool.activeThreadCount()
-         max_threads = self.thread_pool.maxThreadCount()
-         self.status.showMessage(f"ThreadPool: {active} active of {max_threads}", 3000)
+        active = self.thread_pool.activeThreadCount()
+        max_threads = self.thread_pool.maxThreadCount()
+        self.status.showMessage(
+            f"ThreadPool: {active} active of {max_threads}", 3000)
 
     def _apply_styles(self):
         style_sheet = """
@@ -215,7 +219,7 @@ class MainWindow(QMainWindow):
         # --- Top Part: Editor / History ---
         editor_container = QWidget()
         editor_layout = QVBoxLayout(editor_container)
-        editor_layout.setContentsMargins(0,0,0,0)
+        editor_layout.setContentsMargins(0, 0, 0, 0)
         editor_layout.setSpacing(0)
 
         editor_header = QWidget()
@@ -248,7 +252,8 @@ class MainWindow(QMainWindow):
         history_list_view = QTreeView()
         history_list_view.setObjectName("history_list_view")
         history_list_view.setHeaderHidden(True)
-        history_list_view.setEditTriggers(QAbstractItemView.EditTrigger.NoEditTriggers)
+        history_list_view.setEditTriggers(
+            QAbstractItemView.EditTrigger.NoEditTriggers)
 
         history_details_group = QGroupBox("Query Details")
         history_details_layout = QVBoxLayout(history_details_group)
@@ -262,7 +267,7 @@ class MainWindow(QMainWindow):
         copy_to_edit_btn = QPushButton("Copy to Edit Query")
         remove_history_btn = QPushButton("Remove")
         remove_all_history_btn = QPushButton("Remove All")
-        
+
         history_button_layout.addStretch()
         history_button_layout.addWidget(copy_history_btn)
         history_button_layout.addWidget(copy_to_edit_btn)
@@ -288,14 +293,20 @@ class MainWindow(QMainWindow):
         query_view_btn.clicked.connect(lambda: switch_editor_view(0))
         history_view_btn.clicked.connect(lambda: switch_editor_view(1))
 
-        db_combo_box.currentIndexChanged.connect(lambda: editor_stack.currentIndex() == 1 and self.load_connection_history(tab_content))
-        history_list_view.clicked.connect(lambda index: self.display_history_details(index, tab_content))
-        
+        db_combo_box.currentIndexChanged.connect(lambda: editor_stack.currentIndex(
+        ) == 1 and self.load_connection_history(tab_content))
+        history_list_view.clicked.connect(
+            lambda index: self.display_history_details(index, tab_content))
+
         # --- Connect new history buttons ---
-        copy_history_btn.clicked.connect(lambda: self.copy_history_query(tab_content))
-        copy_to_edit_btn.clicked.connect(lambda: self.copy_history_to_editor(tab_content))
-        remove_history_btn.clicked.connect(lambda: self.remove_selected_history(tab_content))
-        remove_all_history_btn.clicked.connect(lambda: self.remove_all_history_for_connection(tab_content))
+        copy_history_btn.clicked.connect(
+            lambda: self.copy_history_query(tab_content))
+        copy_to_edit_btn.clicked.connect(
+            lambda: self.copy_history_to_editor(tab_content))
+        remove_history_btn.clicked.connect(
+            lambda: self.remove_selected_history(tab_content))
+        remove_all_history_btn.clicked.connect(
+            lambda: self.remove_all_history_for_connection(tab_content))
 
         # --- Bottom Part: Results ---
         results_container = QWidget()
@@ -351,7 +362,7 @@ class MainWindow(QMainWindow):
         spinner_label.setObjectName("spinner_label")
 
         if not spinner_movie.isValid():
-            spinner_label.setText("Loading...") # Fallback text
+            spinner_label.setText("Loading...")  # Fallback text
         else:
             spinner_label.setMovie(spinner_movie)
             spinner_movie.setScaledSize(QSize(32, 32))
@@ -372,6 +383,7 @@ class MainWindow(QMainWindow):
         results_layout.addWidget(tab_status_label)
 
         button_group = [output_btn, message_btn, notification_btn]
+
         def switch_results_view(index):
             if results_stack.currentIndex() != 3:
                 results_stack.setCurrentIndex(index)
@@ -418,18 +430,22 @@ class MainWindow(QMainWindow):
         self.model.clear()
         self.model.setHorizontalHeaderLabels(["Object Explorer"])
         categories_data = self.db_manager.get_all_connections_hierarchy()
-        
+
         for cat_data in categories_data:
             cat_item = QStandardItem(cat_data["name"])
-            cat_item.setData(cat_data["id"], Qt.ItemDataRole.UserRole + 1) # Store category ID
-            
+            # Store category ID
+            cat_item.setData(cat_data["id"], Qt.ItemDataRole.UserRole + 1)
+
             for subcat_data in cat_data["subcategories"]:
                 subcat_item = QStandardItem(subcat_data["name"])
-                subcat_item.setData(subcat_data["id"], Qt.ItemDataRole.UserRole + 1) # Store subcategory ID
-                
+                # Store subcategory ID
+                subcat_item.setData(
+                    subcat_data["id"], Qt.ItemDataRole.UserRole + 1)
+
                 for item_data in subcat_data["items"]:
                     item_item = QStandardItem(item_data["name"])
-                    item_item.setData(item_data, Qt.ItemDataRole.UserRole) # Store full connection data
+                    # Store full connection data
+                    item_item.setData(item_data, Qt.ItemDataRole.UserRole)
                     subcat_item.appendRow(item_item)
                 cat_item.appendRow(subcat_item)
             self.model.appendRow(cat_item)
@@ -439,24 +455,29 @@ class MainWindow(QMainWindow):
         depth = self.get_item_depth(item)
         self.schema_model.clear()
         self.schema_model.setHorizontalHeaderLabels(["Database Schema"])
-        
-        # Disconnect previous expansion handler to avoid multiple connections if changing DB type
-        try: self.schema_tree.expanded.disconnect(self._handle_schema_tree_expansion)
-        except TypeError: pass # Ignore if not connected
 
-        if depth == 3: # Connection item clicked
+        # Disconnect previous expansion handler to avoid multiple connections if changing DB type
+        try:
+            self.schema_tree.expanded.disconnect(
+                self._handle_schema_tree_expansion)
+        except TypeError:
+            pass  # Ignore if not connected
+
+        if depth == 3:  # Connection item clicked
             conn_data = item.data(Qt.ItemDataRole.UserRole)
             if conn_data:
-                self.status.showMessage(f"Loading schema for {conn_data.get('name')}...", 3000)
-                
+                self.status.showMessage(
+                    f"Loading schema for {conn_data.get('name')}...", 3000)
+
                 # Determine the correct connector and load schema
-                if conn_data.get("host"): # PostgreSQL
+                if conn_data.get("host"):  # PostgreSQL
                     self.active_schema_connector = self.postgres_connector
                     self.postgres_connector.load_schema(
                         conn_data, self.schema_model, self.status.showMessage,
-                        lambda handler: self.schema_tree.expanded.connect(partial(handler, schema_model=self.schema_model, status_callback=self.status.showMessage))
+                        lambda handler: self.schema_tree.expanded.connect(partial(
+                            handler, schema_model=self.schema_model, status_callback=self.status.showMessage))
                     )
-                elif conn_data.get("db_path"): # SQLite
+                elif conn_data.get("db_path"):  # SQLite
                     self.active_schema_connector = self.sqlite_connector
                     self.sqlite_connector.load_schema(
                         conn_data, self.schema_model, self.status.showMessage
@@ -464,12 +485,11 @@ class MainWindow(QMainWindow):
         # Reconnect the main schema expansion handler
         self.schema_tree.expanded.connect(self._handle_schema_tree_expansion)
 
-
     def _handle_schema_tree_expansion(self, index: QModelIndex):
         """Generic handler for schema tree expansion, delegates to active connector."""
         if self.active_schema_connector and hasattr(self.active_schema_connector, 'load_tables_on_expand'):
-            self.active_schema_connector.load_tables_on_expand(index, self.schema_model, self.status.showMessage)
-
+            self.active_schema_connector.load_tables_on_expand(
+                index, self.schema_model, self.status.showMessage)
 
     def get_item_depth(self, item):
         depth = 0
@@ -481,34 +501,41 @@ class MainWindow(QMainWindow):
 
     def show_context_menu(self, pos):
         index = self.tree.indexAt(pos)
-        if not index.isValid(): return
+        if not index.isValid():
+            return
         item = self.model.itemFromIndex(index)
         depth = self.get_item_depth(item)
         menu = QMenu()
-        if depth == 1: # Category (e.g., PostgreSQL Connections)
+        if depth == 1:  # Category (e.g., PostgreSQL Connections)
             add_subcat = QAction("Add Group", self)
             add_subcat.triggered.connect(lambda: self.add_subcategory(item))
             menu.addAction(add_subcat)
-        elif depth == 2: # Subcategory (e.g., Local PostgreSQL)
+        elif depth == 2:  # Subcategory (e.g., Local PostgreSQL)
             parent_category_item = item.parent()
             if parent_category_item:
                 category_name = parent_category_item.text()
                 if "postgres" in category_name.lower():
-                    add_pg_action = QAction("Add New PostgreSQL Connection", self)
-                    add_pg_action.triggered.connect(lambda: self.add_connection_dialog(item, self.postgres_connector))
+                    add_pg_action = QAction(
+                        "Add New PostgreSQL Connection", self)
+                    add_pg_action.triggered.connect(
+                        lambda: self.add_connection_dialog(item, self.postgres_connector))
                     menu.addAction(add_pg_action)
                 elif "sqlite" in category_name.lower():
-                    add_sqlite_action = QAction("Add New SQLite Connection", self)
-                    add_sqlite_action.triggered.connect(lambda: self.add_connection_dialog(item, self.sqlite_connector))
+                    add_sqlite_action = QAction(
+                        "Add New SQLite Connection", self)
+                    add_sqlite_action.triggered.connect(
+                        lambda: self.add_connection_dialog(item, self.sqlite_connector))
                     menu.addAction(add_sqlite_action)
-        elif depth == 3: # Connection item
+        elif depth == 3:  # Connection item
             conn_data = item.data(Qt.ItemDataRole.UserRole)
             if conn_data:
                 edit_action = QAction("Edit Connection", self)
-                edit_action.triggered.connect(lambda: self.edit_connection_dialog(item, conn_data))
+                edit_action.triggered.connect(
+                    lambda: self.edit_connection_dialog(item, conn_data))
                 menu.addAction(edit_action)
                 delete_action = QAction("Delete Connection", self)
-                delete_action.triggered.connect(lambda: self.delete_connection_item(item))
+                delete_action.triggered.connect(
+                    lambda: self.delete_connection_item(item))
                 menu.addAction(delete_action)
         menu.exec(self.tree.viewport().mapToGlobal(pos))
 
@@ -521,7 +548,8 @@ class MainWindow(QMainWindow):
                 self.load_object_explorer_data()
                 self.refresh_all_comboboxes()
             except Exception as e:
-                QMessageBox.critical(self, "Error", f"Failed to add group:\n{e}")
+                QMessageBox.critical(
+                    self, "Error", f"Failed to add group:\n{e}")
 
     def add_connection_dialog(self, parent_item, connector):
         subcat_id = parent_item.data(Qt.ItemDataRole.UserRole + 1)
@@ -533,18 +561,21 @@ class MainWindow(QMainWindow):
                 self.load_object_explorer_data()
                 self.refresh_all_comboboxes()
             except Exception as e:
-                QMessageBox.critical(self, "Error", f"Failed to save connection:\n{e}")
+                QMessageBox.critical(
+                    self, "Error", f"Failed to save connection:\n{e}")
 
     def edit_connection_dialog(self, item, conn_data):
         connector = None
-        if conn_data.get("db_path"): # SQLite
+        if conn_data.get("db_path"):  # SQLite
             connector = self.sqlite_connector
-        elif conn_data.get("host"): # PostgreSQL
+        elif conn_data.get("host"):  # PostgreSQL
             connector = self.postgres_connector
-        
-        if not connector: return
 
-        dialog = connector.get_connection_dialog(self, conn_data=conn_data, is_editing=True)
+        if not connector:
+            return
+
+        dialog = connector.get_connection_dialog(
+            self, conn_data=conn_data, is_editing=True)
         if dialog.exec() == QDialog.DialogCode.Accepted:
             new_data = dialog.get_data()
             try:
@@ -552,7 +583,8 @@ class MainWindow(QMainWindow):
                 self.load_object_explorer_data()
                 self.refresh_all_comboboxes()
             except Exception as e:
-                QMessageBox.critical(self, "Error", f"Failed to update connection:\n{e}")
+                QMessageBox.critical(
+                    self, "Error", f"Failed to update connection:\n{e}")
 
     def delete_connection_item(self, item):
         conn_data = item.data(Qt.ItemDataRole.UserRole)
@@ -565,7 +597,8 @@ class MainWindow(QMainWindow):
                 self.load_object_explorer_data()
                 self.refresh_all_comboboxes()
             except Exception as e:
-                QMessageBox.critical(self, "Error", f"Failed to delete item:\n{e}")
+                QMessageBox.critical(
+                    self, "Error", f"Failed to delete item:\n{e}")
 
     def refresh_all_comboboxes(self):
         for i in range(self.tab_widget.count()):
@@ -576,13 +609,14 @@ class MainWindow(QMainWindow):
 
     def load_joined_items(self, combo_box):
         try:
-            current_data_id = combo_box.currentData().get('id') if combo_box.currentData() else None
+            current_data_id = combo_box.currentData().get(
+                'id') if combo_box.currentData() else None
             combo_box.clear()
             all_items = self.db_manager.get_all_joined_connections()
             for cat_name, subcat_name, item_name, conn_data in all_items:
                 visible_text = f"{cat_name} -> {subcat_name} -> {item_name}"
                 combo_box.addItem(visible_text, conn_data)
-            
+
             if current_data_id is not None:
                 for i in range(combo_box.count()):
                     if combo_box.itemData(i) and combo_box.itemData(i)['id'] == current_data_id:
@@ -640,23 +674,26 @@ class MainWindow(QMainWindow):
     #     timeout_timer.start(self.QUERY_TIMEOUT)
     #     self.status_message_label.setText("Executing query...")
 
-
     def execute_query(self):
         current_tab = self.tab_widget.currentWidget()
-        if not current_tab: return
+        if not current_tab:
+            return
 
         # Ensure editor_stack is found correctly
         editor_stack = current_tab.findChild(QStackedWidget, "editor_stack")
         if editor_stack is None:
-            QMessageBox.critical(self, "Internal Error", "Could not find the query editor stack.")
+            QMessageBox.critical(self, "Internal Error",
+                                 "Could not find the query editor stack.")
             return
 
         if editor_stack.currentIndex() == 1:
-            QMessageBox.information(self, "Info", "Cannot execute from History view. Switch to the Query view.")
+            QMessageBox.information(
+                self, "Info", "Cannot execute from History view. Switch to the Query view.")
             return
 
         if current_tab in self.running_queries:
-            QMessageBox.warning(self, "Query in Progress", "A query is already running in this tab.")
+            QMessageBox.warning(self, "Query in Progress",
+                                "A query is already running in this tab.")
             return
 
         query_editor = current_tab.findChild(QTextEdit, "query_editor")
@@ -668,8 +705,10 @@ class MainWindow(QMainWindow):
 
         # --- NEW: Semicolon Check ---
         if not query.endswith(';'):
-            QMessageBox.warning(self, "Missing Semicolon", "Query must end with a semicolon (;) to execute.")
-            self.status.showMessage("Execution aborted: Missing semicolon.", 3000)
+            QMessageBox.warning(self, "Missing Semicolon",
+                                "Query must end with a semicolon (;) to execute.")
+            self.status.showMessage(
+                "Execution aborted: Missing semicolon.", 3000)
             return
         # --- END NEW ---
 
@@ -677,7 +716,8 @@ class MainWindow(QMainWindow):
             self.status.showMessage("Connection or query is empty", 3000)
             return
 
-        results_stack = current_tab.findChild(QStackedWidget, "results_stacked_widget")
+        results_stack = current_tab.findChild(
+            QStackedWidget, "results_stacked_widget")
         spinner_label = results_stack.findChild(QLabel, "spinner_label")
         results_stack.setCurrentIndex(3)
         if spinner_label and spinner_label.movie():
@@ -688,14 +728,18 @@ class MainWindow(QMainWindow):
         start_time = time.time()
         timeout_timer = QTimer(self)
         timeout_timer.setSingleShot(True)
-        self.tab_timers[current_tab] = {"timer": progress_timer, "start_time": start_time, "timeout_timer": timeout_timer}
-        progress_timer.timeout.connect(partial(self.update_timer_label, tab_status_label, current_tab))
+        self.tab_timers[current_tab] = {
+            "timer": progress_timer, "start_time": start_time, "timeout_timer": timeout_timer}
+        progress_timer.timeout.connect(
+            partial(self.update_timer_label, tab_status_label, current_tab))
         progress_timer.start(100)
         signals = QuerySignals()
         runnable = RunnableQuery(conn_data, query, signals)
-        signals.finished.connect(partial(self.handle_query_result, current_tab))
+        signals.finished.connect(
+            partial(self.handle_query_result, current_tab))
         signals.error.connect(partial(self.handle_query_error, current_tab))
-        timeout_timer.timeout.connect(partial(self.handle_query_timeout, current_tab, runnable))
+        timeout_timer.timeout.connect(
+            partial(self.handle_query_timeout, current_tab, runnable))
         self.running_queries[current_tab] = runnable
         self.cancel_action.setEnabled(True)
         self.thread_pool.start(runnable)
@@ -703,7 +747,8 @@ class MainWindow(QMainWindow):
         self.status_message_label.setText("Executing query...")
 
     def update_timer_label(self, label, tab):
-        if not label or tab not in self.tab_timers: return
+        if not label or tab not in self.tab_timers:
+            return
         elapsed = time.time() - self.tab_timers[tab]["start_time"]
         label.setText(f"Running... {elapsed:.1f} sec")
 
@@ -712,7 +757,8 @@ class MainWindow(QMainWindow):
             self.tab_timers[target_tab]["timer"].stop()
             self.tab_timers[target_tab]["timeout_timer"].stop()
             del self.tab_timers[target_tab]
-        self.db_manager.save_query_to_history(conn_data.get("id"), query, "Success", row_count, elapsed_time)
+        self.db_manager.save_query_to_history(conn_data.get(
+            "id"), query, "Success", row_count, elapsed_time)
         table_view = target_tab.findChild(QTableView, "result_table")
         message_view = target_tab.findChild(QTextEdit, "message_view")
         tab_status_label = target_tab.findChild(QLabel, "tab_status_label")
@@ -725,7 +771,8 @@ class MainWindow(QMainWindow):
             msg = f"Query executed successfully.\n\nTotal rows: {row_count}\nTime: {elapsed_time:.2f} sec"
             status = f"Query executed successfully | Total rows: {row_count} | Time: {elapsed_time:.2f} sec"
         else:
-            table_view.setModel(QStandardItemModel()) # Clear table view for non-select
+            # Clear table view for non-select
+            table_view.setModel(QStandardItemModel())
             msg = f"Command executed successfully.\n\nRows affected: {row_count}\nTime: {elapsed_time:.2f} sec"
             status = f"Command executed successfully | Rows affected: {row_count} | Time: {elapsed_time:.2f} sec"
         message_view.setText(msg)
@@ -748,8 +795,10 @@ class MainWindow(QMainWindow):
         message_view.setText(f"Error:\n\n{error_message}")
         tab_status_label.setText(error_text)
         self.db_manager.save_query_to_history(
-            target_tab.findChild(QComboBox, "db_combo_box").currentData().get("id"), 
-            target_tab.findChild(QTextEdit, "query_editor").toPlainText().strip(), 
+            target_tab.findChild(
+                QComboBox, "db_combo_box").currentData().get("id"),
+            target_tab.findChild(
+                QTextEdit, "query_editor").toPlainText().strip(),
             "Failed", 0, 0
         )
         self.status_message_label.setText("Error occurred")
@@ -760,8 +809,10 @@ class MainWindow(QMainWindow):
             self.cancel_action.setEnabled(False)
 
     def stop_spinner(self, target_tab, success=True):
-        if not target_tab: return
-        stacked_widget = target_tab.findChild(QStackedWidget, "results_stacked_widget")
+        if not target_tab:
+            return
+        stacked_widget = target_tab.findChild(
+            QStackedWidget, "results_stacked_widget")
         if stacked_widget:
             spinner_label = stacked_widget.findChild(QLabel, "spinner_label")
             if spinner_label and spinner_label.movie():
@@ -769,11 +820,17 @@ class MainWindow(QMainWindow):
             header = target_tab.findChild(QWidget, "resultsHeader")
             buttons = header.findChildren(QPushButton)
             if success:
-                stacked_widget.setCurrentIndex(0) # Show results table
-                if buttons: buttons[0].setChecked(True); buttons[1].setChecked(False); buttons[2].setChecked(False)
+                stacked_widget.setCurrentIndex(0)  # Show results table
+                if buttons:
+                    buttons[0].setChecked(True)
+                    buttons[1].setChecked(False)
+                    buttons[2].setChecked(False)
             else:
-                stacked_widget.setCurrentIndex(1) # Show message view
-                if buttons: buttons[0].setChecked(False); buttons[1].setChecked(True); buttons[2].setChecked(False)
+                stacked_widget.setCurrentIndex(1)  # Show message view
+                if buttons:
+                    buttons[0].setChecked(False)
+                    buttons[1].setChecked(True)
+                    buttons[2].setChecked(False)
 
     def handle_query_timeout(self, tab, runnable):
         if self.running_queries.get(tab) is runnable:
@@ -782,7 +839,8 @@ class MainWindow(QMainWindow):
             tab.findChild(QTextEdit, "message_view").setText(error_message)
             tab.findChild(QLabel, "tab_status_label").setText(error_message)
             self.db_manager.save_query_to_history(
-                tab.findChild(QComboBox, "db_combo_box").currentData().get("id"),
+                tab.findChild(
+                    QComboBox, "db_combo_box").currentData().get("id"),
                 tab.findChild(QTextEdit, "query_editor").toPlainText().strip(),
                 "Timed Out", 0, self.QUERY_TIMEOUT / 1000
             )
@@ -795,7 +853,8 @@ class MainWindow(QMainWindow):
             if not self.running_queries:
                 self.cancel_action.setEnabled(False)
             self.status_message_label.setText("Error occurred")
-            QMessageBox.warning(self, "Query Timeout", f"The query was stopped as it exceeded {self.QUERY_TIMEOUT / 1000}s.")
+            QMessageBox.warning(
+                self, "Query Timeout", f"The query was stopped as it exceeded {self.QUERY_TIMEOUT / 1000}s.")
 
     def cancel_current_query(self):
         current_tab = self.tab_widget.currentWidget()
@@ -807,11 +866,15 @@ class MainWindow(QMainWindow):
                 self.tab_timers[current_tab]["timeout_timer"].stop()
                 del self.tab_timers[current_tab]
             cancel_message = "Query cancelled by user."
-            current_tab.findChild(QTextEdit, "message_view").setText(cancel_message)
-            current_tab.findChild(QLabel, "tab_status_label").setText(cancel_message)
+            current_tab.findChild(
+                QTextEdit, "message_view").setText(cancel_message)
+            current_tab.findChild(
+                QLabel, "tab_status_label").setText(cancel_message)
             self.db_manager.save_query_to_history(
-                current_tab.findChild(QComboBox, "db_combo_box").currentData().get("id"),
-                current_tab.findChild(QTextEdit, "query_editor").toPlainText().strip(),
+                current_tab.findChild(
+                    QComboBox, "db_combo_box").currentData().get("id"),
+                current_tab.findChild(
+                    QTextEdit, "query_editor").toPlainText().strip(),
                 "Cancelled", 0, 0
             )
             self.stop_spinner(current_tab, success=False)
@@ -823,46 +886,54 @@ class MainWindow(QMainWindow):
 
     # --- Query History Methods ---
     def load_connection_history(self, target_tab):
-        history_list_view = target_tab.findChild(QTreeView, "history_list_view")
-        history_details_view = target_tab.findChild(QTextEdit, "history_details_view")
+        history_list_view = target_tab.findChild(
+            QTreeView, "history_list_view")
+        history_details_view = target_tab.findChild(
+            QTextEdit, "history_details_view")
         db_combo_box = target_tab.findChild(QComboBox, "db_combo_box")
         model = QStandardItemModel()
         history_list_view.setModel(model)
         history_details_view.clear()
-        
+
         conn_data = db_combo_box.currentData()
-        if not conn_data: 
+        if not conn_data:
             model.setHorizontalHeaderLabels(['No Connection Selected'])
             return
-        
+
         model.setHorizontalHeaderLabels(['Connection History'])
         conn_id = conn_data.get("id")
-        
+
         try:
             history = self.db_manager.get_connection_history(conn_id)
             for data in history:
                 query = data['query']
-                short_query = ' '.join(query.split())[:70] + ('...' if len(query) > 70 else '')
+                short_query = ' '.join(query.split())[
+                    :70] + ('...' if len(query) > 70 else '')
                 display_text = f"{short_query}\n{data['timestamp']}"
                 item = QStandardItem(display_text)
                 item.setData(data, Qt.ItemDataRole.UserRole)
                 model.appendRow(item)
         except Exception as e:
-            QMessageBox.critical(self, "Error", f"Failed to load query history:\n{e}")
+            QMessageBox.critical(
+                self, "Error", f"Failed to load query history:\n{e}")
 
     def display_history_details(self, index, target_tab):
-        history_details_view = target_tab.findChild(QTextEdit, "history_details_view")
-        if not index.isValid() or not history_details_view: return
+        history_details_view = target_tab.findChild(
+            QTextEdit, "history_details_view")
+        if not index.isValid() or not history_details_view:
+            return
         data = index.model().itemFromIndex(index).data(Qt.ItemDataRole.UserRole)
         details_text = f"Timestamp: {data['timestamp']}\nStatus: {data['status']}\nDuration: {data['duration']:.3f} sec\nRows: {data['rows']}\n\n-- Query --\n{data['query']}"
         history_details_view.setText(details_text)
 
     def _get_selected_history_item(self, target_tab):
         """Helper to get the selected item's data from the history list."""
-        history_list_view = target_tab.findChild(QTreeView, "history_list_view")
+        history_list_view = target_tab.findChild(
+            QTreeView, "history_list_view")
         selected_indexes = history_list_view.selectionModel().selectedIndexes()
         if not selected_indexes:
-            QMessageBox.information(self, "No Selection", "Please select a history item first.")
+            QMessageBox.information(
+                self, "No Selection", "Please select a history item first.")
             return None
         item = selected_indexes[0].model().itemFromIndex(selected_indexes[0])
         return item.data(Qt.ItemDataRole.UserRole)
@@ -880,49 +951,60 @@ class MainWindow(QMainWindow):
             editor_stack = target_tab.findChild(QStackedWidget, "editor_stack")
             query_editor = target_tab.findChild(QTextEdit, "query_editor")
             query_editor.setPlainText(history_data['query'])
-            
+
             # Switch back to the query editor view
             editor_stack.setCurrentIndex(0)
             # Find the buttons by object name or text
             query_view_btn = target_tab.findChild(QPushButton, "Query")
-            history_view_btn = target_tab.findChild(QPushButton, "Query History")
-            if query_view_btn: query_view_btn.setChecked(True)
-            if history_view_btn: history_view_btn.setChecked(False)
-            
+            history_view_btn = target_tab.findChild(
+                QPushButton, "Query History")
+            if query_view_btn:
+                query_view_btn.setChecked(True)
+            if history_view_btn:
+                history_view_btn.setChecked(False)
+
             self.status_message_label.setText("Query copied to editor.")
 
     def remove_selected_history(self, target_tab):
         history_data = self._get_selected_history_item(target_tab)
-        if not history_data: return
-        
+        if not history_data:
+            return
+
         history_id = history_data['id']
-        reply = QMessageBox.question(self, "Remove History", "Are you sure you want to remove the selected query history?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        reply = QMessageBox.question(self, "Remove History", "Are you sure you want to remove the selected query history?",
+                                     QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if reply == QMessageBox.StandardButton.Yes:
             try:
                 self.db_manager.remove_history_item(history_id)
-                self.load_connection_history(target_tab) # Refresh the view
+                self.load_connection_history(target_tab)  # Refresh the view
                 target_tab.findChild(QTextEdit, "history_details_view").clear()
-                self.status_message_label.setText("Selected history item removed.")
+                self.status_message_label.setText(
+                    "Selected history item removed.")
             except Exception as e:
-                QMessageBox.critical(self, "Error", f"Failed to remove history item:\n{e}")
+                QMessageBox.critical(
+                    self, "Error", f"Failed to remove history item:\n{e}")
 
     def remove_all_history_for_connection(self, target_tab):
         db_combo_box = target_tab.findChild(QComboBox, "db_combo_box")
         conn_data = db_combo_box.currentData()
         if not conn_data:
-            QMessageBox.warning(self, "No Connection", "Please select a connection first.")
+            QMessageBox.warning(self, "No Connection",
+                                "Please select a connection first.")
             return
         conn_id = conn_data.get("id")
         conn_name = db_combo_box.currentText()
-        reply = QMessageBox.question(self, "Remove All History", f"Are you sure you want to remove all history for the connection:\n'{conn_name}'?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
+        reply = QMessageBox.question(
+            self, "Remove All History", f"Are you sure you want to remove all history for the connection:\n'{conn_name}'?", QMessageBox.StandardButton.Yes | QMessageBox.StandardButton.No)
         if reply == QMessageBox.StandardButton.Yes:
             try:
                 self.db_manager.remove_all_history_for_connection(conn_id)
                 self.load_connection_history(target_tab)
                 target_tab.findChild(QTextEdit, "history_details_view").clear()
-                self.status_message_label.setText(f"All history for '{conn_name}' removed.")
+                self.status_message_label.setText(
+                    f"All history for '{conn_name}' removed.")
             except Exception as e:
-                QMessageBox.critical(self, "Error", f"Failed to clear history for this connection:\n{e}")
+                QMessageBox.critical(
+                    self, "Error", f"Failed to clear history for this connection:\n{e}")
 
     def show_schema_context_menu(self, position):
         index = self.schema_tree.indexAt(position)
@@ -935,9 +1017,11 @@ class MainWindow(QMainWindow):
         # Check if it's a table/view item based on depth and data
         is_table_or_view = False
         if item_data:
-            if item_data.get('db_type') == 'sqlite' and self.get_item_depth(item) == 1: # SQLite tables are top-level
+            # SQLite tables are top-level
+            if item_data.get('db_type') == 'sqlite' and self.get_item_depth(item) == 1:
                 is_table_or_view = True
-            elif item_data.get('db_type') == 'postgres' and item.parent(): # Postgres tables are under schema
+            # Postgres tables are under schema
+            elif item_data.get('db_type') == 'postgres' and item.parent():
                 is_table_or_view = True
 
         if not is_table_or_view:
@@ -974,12 +1058,13 @@ class MainWindow(QMainWindow):
         self.query_table_rows(item_data, table_name, execute_now=False)
 
     def query_table_rows(self, item_data, table_name, limit=None, execute_now=True, order=None):
-        if not item_data: return
+        if not item_data:
+            return
         conn_data = item_data.get('conn_data')
         new_tab = self.add_tab()
         query_editor = new_tab.findChild(QTextEdit, "query_editor")
         db_combo_box = new_tab.findChild(QComboBox, "db_combo_box")
-        
+
         # Set the correct connection in the new tab's combobox
         for i in range(db_combo_box.count()):
             data = db_combo_box.itemData(i)
@@ -994,20 +1079,22 @@ class MainWindow(QMainWindow):
             query = f'SELECT * FROM "{table_name}"'
 
         if order:
-             # This part for order is simplified; assumes a primary key exists for reliable ordering
-             query += f" ORDER BY 1 {order.upper()}"
+            # This part for order is simplified; assumes a primary key exists for reliable ordering
+            query += f" ORDER BY 1 {order.upper()}"
 
         if limit:
             query += f" LIMIT {limit}"
-        
+
         query_editor.setPlainText(query)
         if execute_now:
-            self.tab_widget.setCurrentWidget(new_tab) # Must set current tab to the new tab before executing
+            # Must set current tab to the new tab before executing
+            self.tab_widget.setCurrentWidget(new_tab)
             self.execute_query()
 
-#test-2
+# test-2
 
-#test 
+# test
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
@@ -1016,7 +1103,7 @@ if __name__ == "__main__":
 
     # DatabaseManager now handles its own initialization of hierarchy.db
     # No need to call sqlite.connect directly here.
-    
+
     window = MainWindow()
     window.show()
     sys.exit(app.exec())
