@@ -1006,6 +1006,7 @@ class MainWindow(QMainWindow):
             self.tab_widget.setCurrentWidget(new_tab) # Must set current tab to the new tab before executing
             self.execute_query()
 
+#test-2
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
